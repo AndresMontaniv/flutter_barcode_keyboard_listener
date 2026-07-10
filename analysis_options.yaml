@@ -1,0 +1,71 @@
+# ------------------------------------------------------------------------------
+# SENIOR FLUTTER DEVELOPER ANALYSIS OPTIONS
+# ------------------------------------------------------------------------------
+# This configuration enforces strict type safety (Dart 3 compliant), 
+# widget tree performance optimizations, and clean architecture best practices.
+# ------------------------------------------------------------------------------
+
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    # Forces explicit casting, preventing silent runtime type errors.
+    strict-casts: true
+    # Forces explicit variable typing when the analyzer cannot infer it.
+    strict-inference: true
+    # Prevents the use of generic types without specifying arguments (e.g., requires List<String> instead of just List).
+    strict-raw-types: true
+
+  errors:
+    # Upgraded severities for critical architectural flaws
+    dead_code: error
+    invalid_assignment: error
+    missing_return: error
+    # Treat TODOs as warnings so they aren't forgotten before release
+    todo: warning
+    # Ensure invalid annotations break the build
+    invalid_annotation_target: error
+
+linter:
+  rules:
+    # --- PERFORMANCE & WIDGET TREE OPTIMIZATION ---
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    prefer_const_literals_to_create_immutables: true
+    sized_box_for_whitespace: true
+    avoid_unnecessary_containers: true
+
+    # --- ARCHITECTURE & CLEAN CODE ---
+    prefer_final_locals: true
+    prefer_final_fields: true
+    always_declare_return_types: true
+    avoid_dynamic_calls: true
+    avoid_print: true
+    prefer_relative_imports: true
+    use_build_context_synchronously: true
+    unawaited_futures: true
+    cancel_subscriptions: true
+    close_sinks: true
+
+    # --- READABILITY & FORMATTING ---
+    prefer_single_quotes: true
+    sort_child_properties_last: true
+    require_trailing_commas: true
+    curly_braces_in_flow_control_structures: true
+    cascade_invocations: true
+    prefer_collection_literals: true
+    avoid_renaming_method_parameters: true
+
+    # --- ERROR PREVENTION & FLOW CONTROL ---
+    avoid_empty_else: true
+    control_flow_in_finally: true
+    avoid_returning_null_for_void: true
+    avoid_catching_errors: true
+    throw_in_finally: true
+
+formatter:
+  page_width: 80
+
+# --- The correct section to add ---
+# formatter:
+#   trailing_commas: preserve

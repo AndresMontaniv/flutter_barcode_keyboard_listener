@@ -19,6 +19,7 @@ class BarcodeKeyboardService {
   final StreamController<BarcodeCapture> _controller = StreamController<BarcodeCapture>.broadcast();
   final StreamController<BarcodeRejection> _rejectionController = StreamController<BarcodeRejection>.broadcast();
   final StringBuffer _buffer = StringBuffer();
+  bool _isRunning = false;
   DateTime? _lastEventTime;
   DateTime? _lastScannedTime;
   String? _lastScannedCode;
@@ -34,12 +35,20 @@ class BarcodeKeyboardService {
   Stream<BarcodeRejection> get rejectionStream => _rejectionController.stream;
 
   /// Registers the keyboard handler with [HardwareKeyboard].
+  ///
+  /// Calling this when the handler is already registered is a no-op.
   void start() {
+    if (_isRunning) return;
+    _isRunning = true;
     HardwareKeyboard.instance.addHandler(_handleKeyEvent);
   }
 
   /// Removes the keyboard handler from [HardwareKeyboard].
+  ///
+  /// Calling this when the handler is not registered is a no-op.
   void stop() {
+    if (!_isRunning) return;
+    _isRunning = false;
     HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
   }
 

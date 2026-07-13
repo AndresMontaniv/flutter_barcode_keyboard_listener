@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'barcode_format.dart';
 
@@ -56,4 +57,25 @@ class BarcodeScannerConfig {
          'HID keyboard streaming is optimized for lightweight 1D retail barcodes; '
          'payloads exceeding 256 characters experience severe latency and timeout risks.',
        );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BarcodeScannerConfig &&
+          listEquals(terminators, other.terminators) &&
+          bufferTimeout == other.bufferTimeout &&
+          deduplicationWindow == other.deduplicationWindow &&
+          listEquals(allowedFormats, other.allowedFormats) &&
+          enableDebugLogs == other.enableDebugLogs &&
+          maxBufferLength == other.maxBufferLength;
+
+  @override
+  int get hashCode => Object.hash(
+        Object.hashAll(terminators),
+        bufferTimeout,
+        deduplicationWindow,
+        Object.hashAll(allowedFormats),
+        enableDebugLogs,
+        maxBufferLength,
+      );
 }

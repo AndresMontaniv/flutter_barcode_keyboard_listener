@@ -57,7 +57,14 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
     super.initState();
 
     // 1. Build config – allow all format by leaving empty list.
-    const config = BarcodeScannerConfig(allowedFormats: [BarcodeFormat.ean13, BarcodeFormat.ean8, BarcodeFormat.upcA]);
+    const config = BarcodeScannerConfig(
+      allowedFormats: [
+        BarcodeFormat.ean13,
+        BarcodeFormat.ean8,
+        BarcodeFormat.upcA,
+        BarcodeFormat.ean14,
+      ],
+    );
 
     // 2. Instantiate the service.
     _barcodeService = BarcodeKeyboardService(config);
@@ -105,9 +112,9 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
     if (rawValue.length > maxDisplayLength) {
       rawValue = '${rawValue.substring(0, maxDisplayLength)}…';
     }
-
+    final formatLabel = rejection.format?.name.toUpperCase() ?? 'UNSUPPORTED';
     setState(() {
-      _recentBarcode = '${rejection.rawValue} (${rejection.format?.name})';
+      _recentBarcode = '${rejection.rawValue} ($formatLabel)';
       _lastRejection = '$rawValue -> (${rejection.reason.name})';
       _addToHistory(rejection);
     });

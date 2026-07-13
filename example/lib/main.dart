@@ -57,7 +57,7 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
     super.initState();
 
     // 1. Build config – allow all format by leaving empty list.
-    const config = BarcodeScannerConfig(allowedFormats: [BarcodeFormat.ean13, BarcodeFormat.ean8]);
+    const config = BarcodeScannerConfig(allowedFormats: [BarcodeFormat.ean13, BarcodeFormat.ean8, BarcodeFormat.upcA]);
 
     // 2. Instantiate the service.
     _barcodeService = BarcodeKeyboardService(config);
@@ -94,6 +94,7 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
   void _processCapture(BarcodeCapture capture) {
     setState(() {
       _recentBarcode = '${capture.rawValue} (${capture.format.name})';
+      _lastRejection = '';
       _addToHistory(capture);
     });
   }
@@ -106,6 +107,7 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
     }
 
     setState(() {
+      _recentBarcode = '${rejection.rawValue} (${rejection.format?.name})';
       _lastRejection = '$rawValue -> (${rejection.reason.name})';
       _addToHistory(rejection);
     });
@@ -242,10 +244,12 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
                               trailing: Text(_formatTimestamp(timestamp)),
                             );
                           case BarcodeRejection():
+                            final format = record.format?.name.toUpperCase();
+                            final subtitle = format != null ? '$format (${record.reason.name})' : record.reason.name;
                             return ListTile(
                               leading: const Icon(
-                                CupertinoIcons.barcode,
-                                color: Colors.black,
+                                Icons.disabled_by_default_outlined,
+                                color: Colors.redAccent,
                                 size: 35,
                               ),
                               title: Text(
@@ -257,11 +261,10 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
                                 maxLines: 1,
                               ),
                               subtitle: Text(
-                                record.reason.name,
+                                subtitle,
                                 style: const TextStyle(
                                   color: Colors.red,
-                                  fontSize: 12,
-
+                                  fontSize: 11,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 maxLines: 2,

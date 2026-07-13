@@ -61,23 +61,48 @@ class BarcodeKeyboardService {
       return const BarcodeRejection('', RejectionReason.empty);
     }
 
-    final formatsToTest = config.allowedFormats.isNotEmpty
+    // 1. Stage 1: Check if the barcode matches an ALLOWED format.
+    final allowedToTest = config.allowedFormats.isNotEmpty
         ? config.allowedFormats
         : BarcodeFormat.values;
 
-    final format = BarcodeFormat.detectFormat(rawValue, formatsToTest);
+    final allowedFormat = BarcodeFormat.detectFormat(rawValue, allowedToTest);
 
-    if (format == BarcodeFormat.unknown) {
-      return BarcodeRejection(rawValue, RejectionReason.unsupportedFormat);
+    if (allowedFormat != BarcodeFormat.unknown) {
+      return BarcodeCapture(rawValue, allowedFormat);
     }
 
-    return BarcodeCapture(rawValue, format);
+    // 2. Stage 2: It failed the allowed list. Is it a KNOWN format that was disallowed?
+    if (config.allowedFormats.isNotEmpty) {
+      final knownFormat = BarcodeFormat.detectFormat(
+        rawValue,
+        BarcodeFormat.values,
+      );
+      if (knownFormat != BarcodeFormat.unknown) {
+        return BarcodeRejection(
+          rawValue,
+          RejectionReason.disallowedFormat,
+          knownFormat,
+        );
+      }
+    }
+
+    // 3. Complete Failure: Unsupported symbology or corrupted string.
+    return BarcodeRejection(
+      rawValue,
+      RejectionReason.unsupportedFormat,
+      BarcodeFormat.unknown,
+    );
   }
 
   /// Emits a [BarcodeRejection] on the rejection stream, logs if debug is
   /// enabled, and returns `false` so callers can `return _emitRejection(…)`.
-  bool _emitRejection(String code, RejectionReason reason) {
-    final rejection = BarcodeRejection(code, reason);
+  bool _emitRejection(
+    String code,
+    RejectionReason reason, [
+    BarcodeFormat? format,
+  ]) {
+    final rejection = BarcodeRejection(code, reason, format);
     _rejectionController.sink.add(rejection);
     if (config.enableDebugLogs) {
       debugPrint('[BarcodeKeyboardService] Rejected (${reason.name}): $code');
@@ -106,29 +131,56 @@ class BarcodeKeyboardService {
 
       if (scannedCode.isEmpty) return false;
 
-      // 1. Format Gatekeeper
-      final formatsToTest = config.allowedFormats.isNotEmpty
+      // 1. Stage 1: Check if the barcode matches an ALLOWED format.
+      final allowedToTest = config.allowedFormats.isNotEmpty
           ? config.allowedFormats
           : BarcodeFormat.values;
 
-      final format = BarcodeFormat.detectFormat(scannedCode, formatsToTest);
+      final allowedFormat = BarcodeFormat.detectFormat(
+        scannedCode,
+        allowedToTest,
+      );
 
-      // STRICT GUARD: If it doesn't match a known regex, reject immediately.
-      if (format == BarcodeFormat.unknown) {
-        return _emitRejection(scannedCode, RejectionReason.unsupportedFormat);
+      if (allowedFormat != BarcodeFormat.unknown) {
+        // 2. Deduplication Shield
+        if (_lastScannedCode == scannedCode &&
+            _lastScannedTime != null &&
+            now.difference(_lastScannedTime!) < config.deduplicationWindow) {
+          return _emitRejection(
+            scannedCode,
+            RejectionReason.deduplicated,
+            allowedFormat,
+          );
+        }
+
+        // 3. Emit Success
+        _lastScannedCode = scannedCode;
+        _lastScannedTime = now;
+        _controller.sink.add(BarcodeCapture(scannedCode, allowedFormat));
+        return false;
       }
 
-      // 2. Deduplication Shield (Single Check)
-      if (_lastScannedCode == scannedCode &&
-          _lastScannedTime != null &&
-          now.difference(_lastScannedTime!) < config.deduplicationWindow) {
-        return _emitRejection(scannedCode, RejectionReason.deduplicated);
+      // 4. Stage 2: It failed the allowed list. Is it a KNOWN format that was disallowed?
+      if (config.allowedFormats.isNotEmpty) {
+        final knownFormat = BarcodeFormat.detectFormat(
+          scannedCode,
+          BarcodeFormat.values,
+        );
+        if (knownFormat != BarcodeFormat.unknown) {
+          return _emitRejection(
+            scannedCode,
+            RejectionReason.disallowedFormat,
+            knownFormat,
+          );
+        }
       }
 
-      // 3. Emit Success
-      _lastScannedCode = scannedCode;
-      _lastScannedTime = now;
-      _controller.sink.add(BarcodeCapture(scannedCode, format));
+      // 5. Complete Failure: Unsupported symbology or corrupted string.
+      return _emitRejection(
+        scannedCode,
+        RejectionReason.unsupportedFormat,
+        null,
+      );
     } else {
       // Buffer overflow guard: clear and reject if a malfunctioning scanner
       // streams excessive data.
@@ -137,6 +189,7 @@ class BarcodeKeyboardService {
         return _emitRejection(
           event.character ?? 'OVERFLOW',
           RejectionReason.bufferOverflow,
+          null,
         );
       }
 

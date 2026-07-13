@@ -2,10 +2,11 @@ import 'barcode_format.dart';
 
 /// Reasons a scanned or manually entered barcode may be rejected.
 enum RejectionReason {
-  unsupportedFormat,
-  deduplicated,
-  empty,
-  bufferOverflow,
+  unsupportedFormat, // String failed ALL known symbology regex patterns
+  disallowedFormat,  // String matched a known format, but was NOT in allowedFormats
+  deduplicated,      // Caught by the temporal deduplication shield
+  empty,             // Zero characters scanned
+  bufferOverflow,    // Exceeded maxBufferLength
 }
 
 /// A sealed result type representing the outcome of a barcode scan or
@@ -38,19 +39,22 @@ class BarcodeCapture extends BarcodeResult {
 /// A rejected barcode scan with the [reason] for rejection.
 class BarcodeRejection extends BarcodeResult {
   final RejectionReason reason;
+  final BarcodeFormat? format;
 
-  const BarcodeRejection(super.rawValue, this.reason);
+  const BarcodeRejection(super.rawValue, this.reason, [this.format]);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is BarcodeRejection &&
+          runtimeType == other.runtimeType &&
           rawValue == other.rawValue &&
-          reason == other.reason;
+          reason == other.reason &&
+          format == other.format;
 
   @override
-  int get hashCode => Object.hash(rawValue, reason);
+  int get hashCode => Object.hash(rawValue, reason, format);
 
   @override
-  String toString() => 'BarcodeRejection($rawValue, $reason)';
+  String toString() => 'BarcodeRejection(rawValue: $rawValue, reason: ${reason.name}, format:${format?.name ?? "null"})';
 }

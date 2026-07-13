@@ -14,10 +14,8 @@ import '../models/barcode_scanner_config.dart';
 class BarcodeKeyboardService {
   final BarcodeScannerConfig config;
 
-  final StreamController<BarcodeCapture> _controller =
-      StreamController<BarcodeCapture>.broadcast();
-  final StreamController<BarcodeRejection> _rejectionController =
-      StreamController<BarcodeRejection>.broadcast();
+  final StreamController<BarcodeCapture> _controller = StreamController<BarcodeCapture>.broadcast();
+  final StreamController<BarcodeRejection> _rejectionController = StreamController<BarcodeRejection>.broadcast();
   final StringBuffer _buffer = StringBuffer();
   DateTime? _lastEventTime;
   DateTime? _lastScannedTime;
@@ -62,9 +60,7 @@ class BarcodeKeyboardService {
     }
 
     // 1. Stage 1: Check if the barcode matches an ALLOWED format.
-    final allowedToTest = config.allowedFormats.isNotEmpty
-        ? config.allowedFormats
-        : BarcodeFormat.values;
+    final allowedToTest = config.allowedFormats.isNotEmpty ? config.allowedFormats : BarcodeFormat.values;
 
     final allowedFormat = BarcodeFormat.detectFormat(rawValue, allowedToTest);
 
@@ -118,8 +114,7 @@ class BarcodeKeyboardService {
 
     // Timeout guard: if too much time elapsed since the last keystroke,
     // the buffer contains human typing – purge it.
-    if (_lastEventTime != null &&
-        now.difference(_lastEventTime!) > config.bufferTimeout) {
+    if (_lastEventTime != null && now.difference(_lastEventTime!) > config.bufferTimeout) {
       _buffer.clear();
     }
     _lastEventTime = now;
@@ -132,9 +127,7 @@ class BarcodeKeyboardService {
       if (scannedCode.isEmpty) return false;
 
       // 1. Stage 1: Check if the barcode matches an ALLOWED format.
-      final allowedToTest = config.allowedFormats.isNotEmpty
-          ? config.allowedFormats
-          : BarcodeFormat.values;
+      final allowedToTest = config.allowedFormats.isNotEmpty ? config.allowedFormats : BarcodeFormat.values;
 
       final allowedFormat = BarcodeFormat.detectFormat(
         scannedCode,
@@ -143,9 +136,7 @@ class BarcodeKeyboardService {
 
       if (allowedFormat != BarcodeFormat.unknown) {
         // 2. Deduplication Shield
-        if (_lastScannedCode == scannedCode &&
-            _lastScannedTime != null &&
-            now.difference(_lastScannedTime!) < config.deduplicationWindow) {
+        if (_lastScannedCode == scannedCode && _lastScannedTime != null && now.difference(_lastScannedTime!) < config.deduplicationWindow) {
           return _emitRejection(
             scannedCode,
             RejectionReason.deduplicated,

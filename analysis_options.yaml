@@ -64,8 +64,8 @@ linter:
     throw_in_finally: true
 
 formatter:
-  page_width: 80
+  page_width: 150
+  trailing_commas: preserve
 
 # --- The correct section to add ---
 # formatter:
-#   trailing_commas: preserve

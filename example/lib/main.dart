@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
 import 'package:barcode_keyboard_listener/barcode_keyboard_listener.dart';
 
+import 'widget_wrapper_screen.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -184,8 +186,21 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Barcode Scanner Test'),
+        title: const Text('Imperative Service Mode'),
         backgroundColor: theme.colorScheme.inversePrimary,
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const WidgetWrapperScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.widgets_outlined),
+            label: const Text('Widget Mode'),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

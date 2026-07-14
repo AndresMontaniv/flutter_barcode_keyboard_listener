@@ -1,5 +1,7 @@
 # Best Practices: Avoiding TextField Focus Collisions (HID Wedge Behavior)
 
+> **💡 v1.0.1 Update:** If you are using the declarative `BarcodeKeyboardListener` widget, **Recipe 1 and Route Protection are built-in automatically!** The widget defaults to `autoPauseOnFocus: true`, which autonomously shields your background scanner from TextField collisions and navigation stack Z-index leaks.
+
 When building inventory, POS, or warehouse applications with physical barcode scanners
 (USB / Bluetooth HID), developers frequently encounter a subtle hardware-UX phenomenon:
 **double-scanning when a `TextField` is focused.**
@@ -245,6 +247,29 @@ void _processAnyCapture(String rawValue) {
 > arrives twice in quick succession — which is precisely the double-scan scenario. Two
 > *different* barcodes scanned in rapid succession will both be recorded correctly and
 > are unaffected by this logic.
+
+---
+
+### Recipe 4: IndexedStack & Tabbed Navigation (The Route Guard)
+When using an `IndexedStack` or a `GoRouter` `StatefulShellRoute`, multiple screens remain alive in memory simultaneously. Standard `initState()` and `dispose()` hooks do not fire when switching tabs. 
+
+To prevent a background tab from stealing your hardware scans, bind the `enabled` property of the `BarcodeKeyboardListener` to your navigation state:
+
+```dart
+@override
+Widget build(BuildContext context) {
+  // Example: Watch your BottomNavCubit or GoRouter state
+  final currentNavIndex = context.watch<BottomNavCubit>().state.selectedIndex;
+  final isThisTabActive = currentNavIndex == 1; // 1 = Inventory Tab
+
+  return BarcodeKeyboardListener(
+    // Gate the scanner: Only listen if this specific tab is visually active!
+    enabled: isThisTabActive,
+    onBarcodeScanned: (capture) => _lookupInventory(capture.rawValue),
+    child: Scaffold( ... ),
+  );
+}
+```
 
 ---
 

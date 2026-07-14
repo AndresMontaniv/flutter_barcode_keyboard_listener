@@ -13,6 +13,12 @@ const _gs1Prefix = '01';
 /// [BarcodeCapture] objects through a broadcast [Stream].
 ///
 /// Rejected scans are emitted on a secondary [rejectionStream].
+///
+/// A pure Dart service that intercepts OS-level hardware keystrokes.
+///
+/// This service must be instantiated outside the widget tree. It guarantees
+/// exclusive ownership of the [HardwareKeyboard.instance] handler to prevent
+/// memory leaks and simultaneous global stream collisions.
 class BarcodeKeyboardService {
   final BarcodeScannerConfig config;
 
@@ -39,9 +45,10 @@ class BarcodeKeyboardService {
   /// validation or were deduplicated.
   Stream<BarcodeRejection> get rejectionStream => _rejectionController.stream;
 
-  /// Registers the keyboard handler with [HardwareKeyboard].
-  ///
-  /// Calling this when the handler is already registered is a no-op.
+  /// Begins intercepting hardware keystrokes.
+  /// 
+  /// This method is idempotent. Calling it multiple times will safely 
+  /// enforce exclusive handler ownership without duplicating listeners.
   void start() {
     if (_isRunning) return;
 
@@ -57,9 +64,10 @@ class BarcodeKeyboardService {
     HardwareKeyboard.instance.addHandler(_handleKeyEvent);
   }
 
-  /// Removes the keyboard handler from [HardwareKeyboard].
-  ///
-  /// Calling this when the handler is not registered is a no-op.
+  /// Safely detaches from the global keyboard stream.
+  /// 
+  /// Must be called during the teardown phase of the consuming Cubit or Provider
+  /// to ensure cleanly disposed stream subscriptions.
   void stop() {
     if (!_isRunning) return;
     _isRunning = false;

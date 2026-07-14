@@ -56,6 +56,11 @@ class BarcodeKeyboardListener extends StatefulWidget {
   /// Defaults to `true`.
   final bool enabled;
 
+  /// Whether to automatically pause hardware scanning whenever an input text field
+  /// ([EditableText]) gains focus or when this screen is covered by another route.
+  /// Defaults to [true].
+  final bool autoPauseOnFocus;
+
   /// Creates a declarative barcode keyboard listener widget.
   const BarcodeKeyboardListener({
     super.key,
@@ -64,6 +69,7 @@ class BarcodeKeyboardListener extends StatefulWidget {
     this.onBarcodeRejected,
     this.config = const BarcodeScannerConfig(),
     this.enabled = true,
+    this.autoPauseOnFocus = true,
   });
 
   @override
@@ -80,6 +86,29 @@ class _BarcodeKeyboardListenerState extends State<BarcodeKeyboardListener> {
   void initState() {
     super.initState();
     _initService();
+    if (widget.autoPauseOnFocus) {
+      FocusManager.instance.addListener(_onGlobalFocusChanged);
+    }
+  }
+
+  void _onGlobalFocusChanged() {
+    if (!widget.autoPauseOnFocus) return;
+
+    // --- ROUTE VISIBILITY GUARD ---
+    // If this screen is covered by another pushed screen, ignore global focus shifts
+    // so we never accidentally wake up and steal hardware ownership from the active route!
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+
+    final focus = FocusManager.instance.primaryFocus;
+    final isTextFieldActive =
+        focus?.context?.findAncestorWidgetOfExactType<EditableText>() != null ||
+        focus?.context?.widget is EditableText;
+
+    if (isTextFieldActive) {
+      _service.stop();
+    } else if (widget.enabled) {
+      _service.start();
+    }
   }
 
   void _initService() {
@@ -108,6 +137,14 @@ class _BarcodeKeyboardListenerState extends State<BarcodeKeyboardListener> {
   @override
   void didUpdateWidget(BarcodeKeyboardListener oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.autoPauseOnFocus != widget.autoPauseOnFocus) {
+      if (widget.autoPauseOnFocus) {
+        FocusManager.instance.addListener(_onGlobalFocusChanged);
+      } else {
+        FocusManager.instance.removeListener(_onGlobalFocusChanged);
+      }
+    }
 
     // 1. If configuration changed, hot-swap the entire service instance.
     if (widget.config != oldWidget.config) {
@@ -145,6 +182,9 @@ class _BarcodeKeyboardListenerState extends State<BarcodeKeyboardListener> {
 
   @override
   void dispose() {
+    if (widget.autoPauseOnFocus) {
+      FocusManager.instance.removeListener(_onGlobalFocusChanged);
+    }
     _teardownService();
     super.dispose();
   }

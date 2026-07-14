@@ -139,7 +139,7 @@ Because physical USB/Bluetooth HID scanners act as operating system keyboards, s
 
 We provide 3 simple presentation-layer recipes (`FocusNode` Gatekeeping, Global Focus Shielding, and UI Deduplication) to handle this effortlessly in your app.
 
-👉 **[Read the authoritative guide on avoiding HID Wedge Focus Collisions here.](GUIDE_HID_WEDGE_COLLISIONS.md)**
+👉 **[Read the authoritative guide on avoiding HID Wedge Focus Collisions. The file is on the root of the project "GUIDE_HID_WEDGE_COLLISIONS.md".](GUIDE_HID_WEDGE_COLLISIONS.md)**
 
 ---
 

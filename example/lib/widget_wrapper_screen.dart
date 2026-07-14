@@ -18,7 +18,6 @@ class _WidgetWrapperScreenState extends State<WidgetWrapperScreen> {
 
   // ── Manual entry controller ─────────────────────────────────────────────
   final TextEditingController _manualController = TextEditingController();
-  final FocusNode _manualFocusNode = FocusNode();
 
   // ── Configuration ───────────────────────────────────────────────────────
   static const _allowedFormats = [
@@ -36,15 +35,10 @@ class _WidgetWrapperScreenState extends State<WidgetWrapperScreen> {
   @override
   void initState() {
     super.initState();
-    // --- RECIPE 1: FOCUSNODE GATEKEEPER ---
-    // Rebuild when the manual entry TextField gains or loses focus so the
-    // BarcodeKeyboardListener widget dynamically pauses/resumes listening.
-    _manualFocusNode.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _manualFocusNode.dispose();
     _manualController.dispose();
     // Notice: No service or stream subscriptions to cancel!
     super.dispose();
@@ -129,10 +123,8 @@ class _WidgetWrapperScreenState extends State<WidgetWrapperScreen> {
     // Wrap the entire screen (or body) in the declarative listener!
     return BarcodeKeyboardListener(
       config: _config,
-      // --- RECIPE 1: FOCUSNODE GATEKEEPER ---
-      // Automatically pause background HID wedge listening while the manual
-      // entry TextField is focused, preventing the double-scan problem.
-      enabled: _isListeningEnabled && !_manualFocusNode.hasFocus,
+      // No need to check FocusNode! autoPauseOnFocus is true by default.
+      enabled: _isListeningEnabled,
       onBarcodeScanned: _processCapture,
       onBarcodeRejected: _processRejection,
       child: Scaffold(
@@ -211,7 +203,6 @@ class _WidgetWrapperScreenState extends State<WidgetWrapperScreen> {
                   Expanded(
                     child: TextField(
                       controller: _manualController,
-                      focusNode: _manualFocusNode,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         labelText: 'Manual barcode entry',

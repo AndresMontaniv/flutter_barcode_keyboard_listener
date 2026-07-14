@@ -1,7 +1,7 @@
-# Barcode Keyboard Listener
+# Barcode HID Listener
 
-[![Pub Version](https://img.shields.io/pub/v/barcode_keyboard_listener)](https://pub.dev/packages/barcode_keyboard_listener)
-[![Pub Points](https://img.shields.io/pub/points/barcode_keyboard_listener)](https://pub.dev/packages/barcode_keyboard_listener/score)
+[![Pub Version](https://img.shields.io/pub/v/barcode_hid_listener)](https://pub.dev/packages/barcode_hid_listener)
+[![Pub Points](https://img.shields.io/pub/points/barcode_hid_listener)](https://pub.dev/packages/barcode_hid_listener/score)
 [![Flutter Platform](https://img.shields.io/badge/Platform-Flutter-02569B?logo=flutter)](https://flutter.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
@@ -24,7 +24,7 @@ Designed for enterprise Retail POS, Warehouse Inventory, and Logistics applicati
 Add it to your `pubspec.yaml`:
 
 ```bash
-flutter pub add barcode_keyboard_listener
+flutter pub add barcode_hid_listener
 
 ```
 
@@ -40,7 +40,7 @@ The easiest way to get started. Wrap your screen in a `BarcodeKeyboardListener` 
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:barcode_keyboard_listener/barcode_keyboard_listener.dart';
+import 'package:barcode_hid_listener/barcode_hid_listener.dart';
 
 class CheckoutScreen extends StatefulWidget {
   @override
@@ -78,7 +78,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 If you are managing background streams inside a View Model, Bloc, or Riverpod Provider, you can instantiate the headless service directly.
 
 ```dart
-import 'package:barcode_keyboard_listener/barcode_keyboard_listener.dart';
+import 'package:barcode_hid_listener/barcode_hid_listener.dart';
 
 // 1. Initialize Configuration
 final config = BarcodeScannerConfig(
@@ -147,5 +147,11 @@ We provide 3 simple presentation-layer recipes (`FocusNode` Gatekeeping, Global 
 
 We highly encourage you to report any malfunctions, bugs, or feature recommendations! 
 
-Please do not hesitate to leave an issue on our [GitHub Issues page](https://github.com/AndresMontaniv/flutter_barcode_keyboard_listener/issues). 
+Please do not hesitate to leave an issue on our [GitHub Issues page](https://github.com/AndresMontaniv/flutter_barcode_hid_listener/issues). 
+
+## 🤝 Acknowledgments
+
+This package was inspired by the design philosophy of [flutter_barcode_listener](https://pub.dev/packages/flutter_barcode_listener). 
+
+We built `barcode_hid_listener` as a modern, null-safe evolution because the original implementation relied on deprecated APIs (such as `RawKeyboard.instance`). Our version has been completely rewritten to utilize the modern `HardwareKeyboard.instance` event API, ensuring long-term compatibility with current and future Flutter versions, and adds enterprise-grade features like GS1 normalization, Two-Stage symbology gatekeeping, and proactive focus-shielding.
 

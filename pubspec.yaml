@@ -1,8 +1,8 @@
-name: barcode_keyboard_listener
+name: barcode_hid_listener
 description: A headless, zero-dependency Flutter package for intercepting, buffering, and validating physical HID barcode scanner keystrokes (USB/Bluetooth).
 version: 1.0.0
-repository: https://github.com/AndresMontaniv/flutter_barcode_keyboard_listener
-issue_tracker: https://github.com/AndresMontaniv/flutter_barcode_keyboard_listener/issues
+repository: https://github.com/AndresMontaniv/flutter_barcode_hid_listener
+issue_tracker: https://github.com/AndresMontaniv/flutter_barcode_hid_listener/issues
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

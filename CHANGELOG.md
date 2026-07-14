@@ -1,6 +1,6 @@
 ## 1.0.0
 
-Initial stable release of `barcode_keyboard_listener`!
+Initial stable release of `barcode_hid_listener`!
 
 **Core Engine**
 * **Two-Stage Symbology Gatekeeper:** Built-in validation for global retail and logistics formats (`EAN-13`, `UPC-A`, `EAN-8`, `UPC-E`, `EAN-14`, `Code 39`).

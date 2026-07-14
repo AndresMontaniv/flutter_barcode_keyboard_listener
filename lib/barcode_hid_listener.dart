@@ -3,7 +3,7 @@
 ///
 /// Provides temporal deduplication, symbology gatekeeping (UPC, EAN, Code 39),
 /// and rich stream-based error reporting without requiring native OS plugins.
-library;
+library barcode_hid_listener;
 
 export 'src/models/barcode_format.dart';
 export 'src/models/barcode_result.dart';

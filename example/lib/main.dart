@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 
-import 'package:barcode_keyboard_listener/barcode_keyboard_listener.dart';
+import 'package:barcode_hid_listener/barcode_hid_listener.dart';
 
 import 'widget_wrapper_screen.dart';
 

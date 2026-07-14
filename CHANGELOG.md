@@ -1,3 +1,10 @@
+## 1.0.1
+
+🛡️ **Core Engine Upgrade: Exclusive Handler Guard**
+* Added static ownership tracking (`_activeInstance`) to `BarcodeKeyboardService`.
+* Guarantees that only **one** hardware keyboard handler is active globally at any time, preventing duplicate scan broadcasts across persistent navigation views (e.g., `IndexedStack` or `GoRouter` shell routes).
+* Added public `isActive` getter on `BarcodeKeyboardService` to query real-time handler ownership.
+
 ## 1.0.0
 
 Initial stable release of `barcode_hid_listener`!

@@ -16,6 +16,11 @@ const _gs1Prefix = '01';
 class BarcodeKeyboardService {
   final BarcodeScannerConfig config;
 
+  /// Class-level tracker: only one instance may own the HardwareKeyboard
+  /// handler at any time. Calling [start] on a new instance automatically
+  /// pauses the previous instance's handler.
+  static BarcodeKeyboardService? _activeInstance;
+
   final StreamController<BarcodeCapture> _controller = StreamController<BarcodeCapture>.broadcast();
   final StreamController<BarcodeRejection> _rejectionController = StreamController<BarcodeRejection>.broadcast();
   final StringBuffer _buffer = StringBuffer();
@@ -39,7 +44,16 @@ class BarcodeKeyboardService {
   /// Calling this when the handler is already registered is a no-op.
   void start() {
     if (_isRunning) return;
+
+    // --- EXCLUSIVE HANDLER GUARD ---
+    // If another service instance is currently active, stop it first
+    // to prevent duplicate global stream broadcasts across hidden tabs.
+    if (_activeInstance != null && _activeInstance != this) {
+      _activeInstance!.stop();
+    }
+
     _isRunning = true;
+    _activeInstance = this;
     HardwareKeyboard.instance.addHandler(_handleKeyEvent);
   }
 
@@ -49,8 +63,17 @@ class BarcodeKeyboardService {
   void stop() {
     if (!_isRunning) return;
     _isRunning = false;
+    
+    // Release static ownership if this instance was the active one
+    if (_activeInstance == this) {
+      _activeInstance = null;
+    }
+    
     HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
   }
+
+  /// Whether this specific service instance currently owns the global keyboard handler.
+  bool get isActive => _activeInstance == this;
 
   /// Removes the keyboard handler and closes both stream controllers.
   void dispose() {

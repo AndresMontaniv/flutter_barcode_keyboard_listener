@@ -92,6 +92,11 @@ class _ScannerTestScreenState extends State<ScannerTestScreen> {
   /// Reacts to global focus changes by pausing or resuming the hardware
   /// keyboard handler based on whether an [EditableText] is focused.
   void _onGlobalFocusChanged() {
+    // --- ROUTE VISIBILITY GUARD ---
+    // If this screen is covered by another pushed screen (like WidgetWrapperScreen),
+    // ignore global focus shifts so we don't steal hardware ownership from the active route!
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+
     final focus = FocusManager.instance.primaryFocus;
 
     final isTextFieldActive = focus?.context?.findAncestorWidgetOfExactType<EditableText>() != null || focus?.context?.widget is EditableText;
